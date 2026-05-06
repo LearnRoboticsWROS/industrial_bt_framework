@@ -1,0 +1,53 @@
+# Motion profiles loaded by bt_runner_node at startup.
+# The "default" profile is the fallback base; every other profile overrides
+# only the fields it sets. Loaded via yaml-cpp (nested schema supported).
+
+motion_profiles:
+  default:
+    planning_time_sec:          4.0
+    num_planning_attempts:      30
+    max_free_space_retries:     15
+    velocity_scaling:           0.20
+    acceleration_scaling:       0.20
+    goal_position_tolerance:    0.003
+    goal_orientation_tolerance: 0.03
+    joint_target_tolerance:     0.02
+    cartesian_primary_step_m:   0.010
+    cartesian_fallback_step_m:  0.005
+    cartesian_eef_step:         0.003
+    cartesian_jump_threshold:   0.0
+    cartesian_min_fraction:     0.999
+    cartesian_final_position_tol: 0.003
+    movel_speed_percent:        50.0
+    scene_update_wait_ms:       800
+    retry_sleep_ms:             150
+    world_spawn_safety_z_m:     0.001
+
+  transit:
+    velocity_scaling:     0.30
+    acceleration_scaling: 0.30
+    movel_speed_percent:  60.0
+
+  home:
+    velocity_scaling:     0.30
+    acceleration_scaling: 0.30
+
+  pick:
+    cartesian_primary_step_m:   0.004
+    cartesian_fallback_step_m:  0.002
+    movel_speed_percent:        25.0
+
+  place:
+    cartesian_primary_step_m:   0.004
+    cartesian_fallback_step_m:  0.002
+    movel_speed_percent:        25.0
+
+  retreat:
+    cartesian_primary_step_m:   0.010
+    cartesian_fallback_step_m:  0.005
+    movel_speed_percent:        40.0
+
+  slow:
+    velocity_scaling:     0.10
+    acceleration_scaling: 0.10
+    movel_speed_percent:  15.0

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Example primitive-only BT tree for pick-and-place with the industrial_bt_framework.
+
+  All task-specific numbers (joint targets, XYZs, tool offsets, tool name, part id)
+  come from bt_runner.yaml's `task_parameters:` section and are referenced here
+  via {blackboard_key}. Editing this file + bt_runner.yaml is enough to cover
+  most industrial single-arm pick-and-place applications.
+-->
+<root BTCPP_format="4" main_tree_to_execute="MainTree">
+
+  <BehaviorTree ID="MainTree">
+    <Sequence name="PickAndPlace">
+      <LogMessage message="Start pick-and-place"/>
+
+      <!-- Go to pre-pick approach -->
+      <MoveToJointTarget joints_deg="{pre_pick_joints_deg}" profile="transit"/>
+
+      <!-- Capture approach pose for retreat -->
+      <StoreCurrentPose pose_key="approach_pick"/>
+
+      <!-- Prevent collision with the target during descent -->
+      <RemoveSceneObject object_id="{part_id}"/>
+
+      <!-- Build descent target: position from task_parameters, orientation from current robot state -->
+      <ComputeTCPTarget
+          target_xyz="{pick_xyz}"
+          tcp_offset_xyz="{tool_offset_xyz}"
+          tcp_offset_rpy_deg="{tool_offset_rpy_deg}"
+          use_current_orientation="true"
+          out_key="pick_tcp"/>
+
+      <!-- Linear descent -->
+      <ExecuteCartesianSegment pose_key="pick_tcp" profile="pick"/>
+
+      <!-- Close the end-effector -->
+      <ActivateTool tool="{tool_name}"/>
+
+      <!-- Lift in tool frame -->
+      <OffsetPoseInToolFrame in_key="pick_tcp" dz="{pick_retreat_m}" out_key="pick_retreat_tcp"/>
+      <ExecuteCartesianSegment pose_key="pick_retreat_tcp" profile="retreat"/>
+
+      <!-- Move to pre-place -->
+      <MoveToJointTarget joints_deg="{pre_place_joints_deg}" profile="transit"/>
+      <StoreCurrentPose pose_key="approach_place"/>
+
+      <ComputeTCPTarget
+          target_xyz="{place_xyz}"
+          tcp_offset_xyz="{tool_offset_xyz}"
+          tcp_offset_rpy_deg="{tool_offset_rpy_deg}"
+          use_current_orientation="true"
+          out_key="place_tcp"/>
+
+      <ExecuteCartesianSegment pose_key="place_tcp" profile="place"/>
+
+      <!-- Release + teleport the scene object to its final pose -->
+      <ReleaseTool tool="{tool_name}"/>
+      <TeleportSceneObject object_id="{part_id}" pose_key="place_tcp"/>
+
+      <OffsetPoseInToolFrame in_key="place_tcp" dz="{place_retreat_m}" out_key="place_retreat_tcp"/>
+      <ExecuteCartesianSegment pose_key="place_retreat_tcp" profile="retreat"/>
+
+      <LogMessage message="Pick-and-place complete"/>
+    </Sequence>
+  </BehaviorTree>
+
+</root>

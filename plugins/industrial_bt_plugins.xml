@@ -1,0 +1,11 @@
+<library path="industrial_bt_backends">
+  <class name="industrial_bt_framework/MoveItCartesianBackend"
+         type="industrial_bt_framework::MoveItCartesianBackend"
+         base_class_type="industrial_bt_framework::CartesianBackend">
+    <description>
+      Default Cartesian motion backend using MoveIt's computeCartesianPath.
+      Works with any robot that has a MoveIt configuration. No vendor
+      dependencies. Configurable via eef_step, jump_threshold, min_fraction.
+    </description>
+  </class>
+</library>

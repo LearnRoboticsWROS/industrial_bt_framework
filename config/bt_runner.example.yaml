@@ -1,0 +1,46 @@
+# Example bt_runner_node parameter file.
+# Edit to adapt to your robot and your application.
+
+bt_runner_node:
+  ros__parameters:
+    # ── Robot ────────────────────────────────────────────────────────────────
+    planning_group:    "manipulator"
+    home_named_target: "home"
+
+    # ── Cartesian backend plugin (default works for any MoveIt robot) ───────
+    cartesian_backend: "industrial_bt_framework/MoveItCartesianBackend"
+
+    # Optional: raw YAML file with plugin-specific params (parsed by the plugin).
+    # Leave empty to use backend defaults.
+    cartesian_backend_params_file: ""
+
+    # ── Tool registry ────────────────────────────────────────────────────────
+    # Map logical tool names to std_srvs/Trigger service endpoints.
+    # BT nodes refer to tools by name (e.g. tool="gripper_primary").
+    tools:
+      gripper_primary:
+        activate_service: "/gripper/close"
+        release_service:  "/gripper/open"
+      # suction_primary:
+      #   activate_service: "/suction/on"
+      #   release_service:  "/suction/off"
+
+    # ── Scene manager service endpoints ─────────────────────────────────────
+    scene_remove_service:   "/scene/remove_object"
+    scene_set_pose_service: "/scene/set_object_pose"
+
+    # ── Task parameters (pushed to BT blackboard under short keys) ──────────
+    # Reference them in the BT XML as {key} (e.g. {pick_xyz}).
+    task_parameters:
+      # Example set; rename / extend freely for your application.
+      pre_pick_joints_deg:   [0.0, -60.0, 80.0, 0.0, 60.0, 0.0]
+      pre_place_joints_deg:  [-30.0, -60.0, 80.0, 0.0, 60.0, 0.0]
+      pick_xyz:              [0.40, 0.10, 0.10]
+      place_xyz:             [0.40, -0.10, 0.10]
+      tool_offset_xyz:       [0.0, 0.0, 0.0]
+      tool_offset_rpy_deg:   [0.0, 0.0, 0.0]
+      pick_retreat_m:        0.10
+      place_retreat_m:       0.10
+      part_id:               "part_A"
+      tool_name:             "gripper_primary"
+      scene_update_wait_ms:  800

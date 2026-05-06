@@ -1,0 +1,32 @@
+# Example scene_manager_node parameter file.
+# Every id listed in `object_ids` must have a corresponding `objects.<id>.*`
+# block below. Supported types: "box", "cylinder", "sphere", "mesh".
+
+scene_manager_node:
+  ros__parameters:
+    frame_id:             "base_link"
+    force_republish_hz:   1.0
+    scene_update_wait_ms: 800
+
+    # Links allowed to collide with everything (typical: end-effector links).
+    # Leave empty to skip ACM tweak.
+    attach_acm_links: []
+
+    # List every scene object id here (order does not matter).
+    object_ids: ["work_table", "part_A"]
+
+    objects:
+      work_table:
+        type: "box"
+        size: [0.9, 1.2, 0.02]
+        position:    [0.0, 0.0, -0.01]
+        orientation: [0.0, 0.0, 0.0, 1.0]
+        dynamic: false
+
+      part_A:
+        type: "cylinder"
+        radius: 0.02
+        height: 0.10
+        position:    [0.40, 0.10, 0.05]
+        orientation: [0.0, 0.0, 0.0, 1.0]
+        dynamic: true
