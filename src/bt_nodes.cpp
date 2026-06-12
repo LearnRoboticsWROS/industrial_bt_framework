@@ -339,24 +339,42 @@ BT::PortsList OffsetPoseInBaseFrame::providedPorts()
     BT::InputPort<std::string>("dx", "0.0"),
     BT::InputPort<std::string>("dy", "0.0"),
     BT::InputPort<std::string>("dz", "0.0"),
+    // Optional vec3 alternative: "x;y;z" (e.g. from a YAML double_array
+    // parameter loaded as task_parameter). If non-empty, OVERRIDES the
+    // individual dx/dy/dz ports. Useful when the offset comes from a single
+    // vec3 task parameter (e.g. capsule_pick_correction_xyz: [-0.025, 0, 0]).
+    BT::InputPort<std::string>("xyz", ""),
     BT::InputPort<std::string>("out_key")
   };
 }
 
 BT::NodeStatus OffsetPoseInBaseFrame::tick()
 {
-  auto in_p  = getInput<std::string>("in_key");
-  auto dx_p  = getInput<std::string>("dx");
-  auto dy_p  = getInput<std::string>("dy");
-  auto dz_p  = getInput<std::string>("dz");
-  auto out_p = getInput<std::string>("out_key");
+  auto in_p   = getInput<std::string>("in_key");
+  auto dx_p   = getInput<std::string>("dx");
+  auto dy_p   = getInput<std::string>("dy");
+  auto dz_p   = getInput<std::string>("dz");
+  auto xyz_p  = getInput<std::string>("xyz");
+  auto out_p  = getInput<std::string>("out_key");
   if (!in_p || !out_p) return BT::NodeStatus::FAILURE;
 
   try {
+    double dx = 0.0, dy = 0.0, dz = 0.0;
+    // Vec3 path: takes precedence if "xyz" port is provided and non-empty.
+    // The vec3 is parsed as "x;y;z" — the same format the bt_runner emits
+    // for task_parameters of type double_array.
+    if (xyz_p && !xyz_p.value().empty()) {
+      auto v = parseXyz3(xyz_p.value());
+      dx = v[0]; dy = v[1]; dz = v[2];
+    } else {
+      if (dx_p) dx = std::stod(dx_p.value());
+      if (dy_p) dy = std::stod(dy_p.value());
+      if (dz_p) dz = std::stod(dz_p.value());
+    }
     auto src = config().blackboard->get<geometry_msgs::msg::Pose>(in_p.value());
-    src.position.x += std::stod(dx_p.value());
-    src.position.y += std::stod(dy_p.value());
-    src.position.z += std::stod(dz_p.value());
+    src.position.x += dx;
+    src.position.y += dy;
+    src.position.z += dz;
     config().blackboard->set<geometry_msgs::msg::Pose>(out_p.value(), src);
     return BT::NodeStatus::SUCCESS;
   } catch (const std::exception & e) {
